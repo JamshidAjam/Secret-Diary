@@ -8,7 +8,15 @@
 <body>
 <?php
 	
+	session_start();
 	$error = "";
+	if (array_key_exists("logout", $_GET)) {
+		unset($_SESSION);
+		setcookie("id", "", time() - 60 * 60);
+		$_COOCKIE['id'] = "";
+	} else if (array_key_exists("id", $_SESSION) OR array_key_exists("id", $_COOCKIE)) {
+		header("Location remember.php");
+	}
 	if (array_key_exists("submit", $_POST)) {
 
 		$link = mysqli_connect("localhost", "jamshid_diary", "jty123", "jamshid_bidemy2");
@@ -36,7 +44,11 @@
 				 } else {
 				 	$query = "UPDATE `users2` SET password = '".md5(md5(mysqli_insert_id($link)).$_POST['password'])."' WHERE id = ".mysqli_insert_id($link)." LIMIT 1";
 				 	mysqli_query($link, $query);
-				 	echo "Sign up successful.= ".md5(md5(mysqli_insert_id($link)).$_POST['password']);
+				 	$_SESSION['id'] = mysqli_insert_id($link);
+				 	if ($_POST['remember'] == '1') {
+				 		setcookie("id", mysqli_insert_id($link), time() + 60 * 60 * 365 );
+				 	}
+				 	header("Location remember.php");
 				 }
 			}
 		}
